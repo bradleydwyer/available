@@ -1,14 +1,14 @@
 [package]
 name = "available"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2024"
 description = "AI-powered project name finder — generates names via LLMs and checks domain + package registry availability"
 license = "MIT"
 
 [dependencies]
-caucus-core = { git = "https://github.com/bradleydwyer/caucus", package = "caucus-core" }
-domain-check = { git = "https://github.com/bradleydwyer/domain-check" }
-pkg-check = { git = "https://github.com/bradleydwyer/pkg-check" }
+caucus-core = { git = "https://github.com/bradleydwyer/caucus", tag = "v1.0.0", package = "caucus-core" }
+domain-check = { git = "https://github.com/bradleydwyer/domain-check", tag = "v1.0.0" }
+pkg-check = { git = "https://github.com/bradleydwyer/pkg-check", tag = "v1.0.0" }
 clap = { version = "4", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
@@ -16,3 +16,4 @@ serde_json = "1"
 rmcp = { version = "0.12", features = ["server", "macros", "transport-io"] }
 schemars = "1"
 anyhow = "1"
+dotenvy = "0.15.7"

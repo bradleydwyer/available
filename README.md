@@ -22,13 +22,13 @@ cargo install --git https://github.com/bradleydwyer/available
 
 ### API keys
 
-At least one LLM API key is required for name generation:
+At least one LLM API key is required for name generation. Set them as environment variables or in a `.env` file:
 
 ```bash
-export ANTHROPIC_API_KEY=sk-...    # Claude
-export OPENAI_API_KEY=sk-...       # GPT
-export GOOGLE_API_KEY=...          # Gemini
-export XAI_API_KEY=...             # Grok
+ANTHROPIC_API_KEY=sk-...    # Claude
+OPENAI_API_KEY=sk-...       # GPT
+GOOGLE_API_KEY=...          # Gemini
+XAI_API_KEY=...             # Grok
 ```
 
 Set multiple keys to get suggestions from several models at once. The `--check` mode works without any API keys.
