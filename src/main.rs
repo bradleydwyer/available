@@ -69,6 +69,7 @@ fn build_config(cli: &Cli) -> Config {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    dotenvy::dotenv().ok();
     let cli = Cli::parse();
 
     // MCP server mode
