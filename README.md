@@ -119,6 +119,16 @@ Claude Code config:
 }
 ```
 
+## Claude Code Skill
+
+available includes a [skill](skill/SKILL.md) for Claude Code. Install it with [equip](https://github.com/bradleydwyer/equip):
+
+```bash
+equip install bradleydwyer/available
+```
+
+This lets Claude Code find and check project names directly when you ask for naming help.
+
 ## Scoring
 
 Each name gets a 0-100% score based on availability:
