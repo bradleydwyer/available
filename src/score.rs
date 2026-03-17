@@ -10,8 +10,9 @@ use crate::types::{DomainDetail, DomainSummary, NameResult, PackageDetail, Packa
 pub fn score(result: &NameResult) -> f64 {
     let domain_score = score_domains(&result.domains);
     let package_score = score_packages(&result.packages);
+    let raw = domain_score + package_score;
 
-    domain_score + package_score
+    (raw * 10000.0).round() / 10000.0
 }
 
 fn score_domains(summary: &DomainSummary) -> f64 {
