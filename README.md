@@ -2,8 +2,6 @@
 
 AI-powered project name finder — generates names via LLMs and checks domain + package registry availability in one shot.
 
-> **Experimental.** This project is new and has not been used in production. Use with caution.
-
 ## About
 
 When starting a new project, finding a name that's available across domains and package registries is tedious manual work. `available` combines [caucus](https://github.com/bradleydwyer/caucus) (multi-LLM generation), [domain-check](https://github.com/bradleydwyer/domain-check), and [pkg-check](https://github.com/bradleydwyer/pkg-check) into a single tool that generates name suggestions and checks their availability in one command.
@@ -12,11 +10,15 @@ It also runs as an MCP server, so AI assistants can find available project names
 
 ## Installation
 
+**Homebrew (macOS):**
+```bash
+brew install bradleydwyer/tap/available
+```
+
+**From source (requires Rust 1.85+):**
 ```bash
 cargo install --git https://github.com/bradleydwyer/available
 ```
-
-Requires Rust 1.85+ (edition 2024).
 
 ### API keys
 
