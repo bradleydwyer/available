@@ -133,6 +133,39 @@ mod tests {
     }
 
     #[test]
+    fn test_all_unknown_score() {
+        // Regression test: all-unknown inputs should yield exactly 0.5 after rounding,
+        // not 0.49999999999999994 due to IEEE 754 drift.
+        let result = NameResult {
+            name: "test".into(),
+            score: 0.0,
+            suggested_by: vec![],
+            domains: DomainSummary {
+                available: 0,
+                registered: 0,
+                unknown: 3,
+                total: 3,
+                details: vec![
+                    DomainDetail { domain: "test.com".into(), available: "unknown".into() },
+                    DomainDetail { domain: "test.dev".into(), available: "unknown".into() },
+                    DomainDetail { domain: "test.io".into(), available: "unknown".into() },
+                ],
+            },
+            packages: PackageSummary {
+                available: 0,
+                taken: 0,
+                unknown: 2,
+                total: 2,
+                details: vec![
+                    PackageDetail { registry: "npm".into(), available: "unknown".into() },
+                    PackageDetail { registry: "crates".into(), available: "unknown".into() },
+                ],
+            },
+        };
+        assert_eq!(score(&result), 0.5);
+    }
+
+    #[test]
     fn test_zero_score() {
         let result = NameResult {
             name: "test".into(),
