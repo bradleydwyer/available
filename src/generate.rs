@@ -4,11 +4,14 @@ use caucus_core::MultiProvider;
 
 use crate::types::{GenerationError, NameCandidate};
 
-const SYSTEM_PROMPT: &str = "\
-You are a creative project naming assistant. Generate exactly 10 unique, memorable project names \
-based on the user's description. Output ONLY a numbered list (1-10), one name per line, no commentary. \
+fn system_prompt(count: usize) -> String {
+    format!(
+        "You are a creative project naming assistant. Generate exactly {count} unique, memorable project names \
+based on the user's description. Output ONLY a numbered list (1-{count}), one name per line, no commentary. \
 Names should be lowercase, use only letters, numbers, and hyphens, and be 2-40 characters long. \
-Prefer short, catchy, easy-to-spell names that work well as package names and domain names.";
+Prefer short, catchy, easy-to-spell names that work well as package names and domain names."
+    )
+}
 
 /// Generate name candidates from multiple LLMs.
 pub async fn generate_names(
@@ -16,7 +19,8 @@ pub async fn generate_names(
     prompt: &str,
     max_names: usize,
 ) -> (Vec<NameCandidate>, Vec<GenerationError>) {
-    let results = provider.generate_all(prompt, Some(SYSTEM_PROMPT)).await;
+    let system = system_prompt(max_names);
+    let results = provider.generate_all(prompt, Some(&system)).await;
 
     let mut name_models: HashMap<String, Vec<String>> = HashMap::new();
     let mut errors = Vec::new();
