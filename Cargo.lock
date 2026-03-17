@@ -92,7 +92,7 @@ checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
 name = "available"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "anyhow",
  "caucus-core",
@@ -155,8 +155,8 @@ checksum = "1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33"
 
 [[package]]
 name = "caucus-core"
-version = "0.4.1"
-source = "git+https://github.com/bradleydwyer/caucus#9b32c956f1a432e5f2ab063e85ad647fd7b43d0f"
+version = "1.0.0"
+source = "git+https://github.com/bradleydwyer/caucus?tag=v1.0.0#b87171fdcf600ba3adfa47911f8bc6007494252f"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -385,8 +385,8 @@ dependencies = [
 
 [[package]]
 name = "domain-check"
-version = "0.1.0"
-source = "git+https://github.com/bradleydwyer/domain-check#68367ca0c4194e0d328d65c99c362b14f4d64669"
+version = "1.0.0"
+source = "git+https://github.com/bradleydwyer/domain-check?tag=v1.0.0#ebba97a1362d82d99a5515d53199a3b7da3d6ed4"
 dependencies = [
  "clap",
  "hickory-resolver",
@@ -1291,8 +1291,8 @@ checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 
 [[package]]
 name = "pkg-check"
-version = "0.1.0"
-source = "git+https://github.com/bradleydwyer/pkg-check#850ec5b81ff4e07451c21b2ce93a2538da358d08"
+version = "1.0.0"
+source = "git+https://github.com/bradleydwyer/pkg-check?tag=v1.0.0#fdb52ccd6d707a907221204a4af40b46ad80b2b6"
 dependencies = [
  "clap",
  "reqwest 0.12.28",

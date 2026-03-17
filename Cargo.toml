@@ -6,9 +6,9 @@ description = "AI-powered project name finder — generates names via LLMs and c
 license = "MIT"
 
 [dependencies]
-caucus-core = { git = "https://github.com/bradleydwyer/caucus", package = "caucus-core" }
-domain-check = { git = "https://github.com/bradleydwyer/domain-check" }
-pkg-check = { git = "https://github.com/bradleydwyer/pkg-check" }
+caucus-core = { git = "https://github.com/bradleydwyer/caucus", tag = "v1.0.0", package = "caucus-core" }
+domain-check = { git = "https://github.com/bradleydwyer/domain-check", tag = "v1.0.0" }
+pkg-check = { git = "https://github.com/bradleydwyer/pkg-check", tag = "v1.0.0" }
 clap = { version = "4", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
