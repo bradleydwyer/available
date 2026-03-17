@@ -1,9 +1,6 @@
 use rmcp::{
-    ErrorData as McpError, ServerHandler,
-    handler::server::tool::ToolRouter,
-    handler::server::wrapper::Parameters,
-    model::*,
-    tool_handler, tool_router,
+    ErrorData as McpError, ServerHandler, handler::server::tool::ToolRouter,
+    handler::server::wrapper::Parameters, model::*, tool_handler, tool_router,
 };
 use schemars::JsonSchema;
 use serde::Deserialize;
@@ -21,9 +18,13 @@ pub struct FindNamesParams {
     pub max_names: Option<usize>,
     #[schemars(description = "Comma-separated TLDs to check (default: com,dev,io)")]
     pub tlds: Option<String>,
-    #[schemars(description = "Comma-separated registry IDs to check (default: popular registries)")]
+    #[schemars(
+        description = "Comma-separated registry IDs to check (default: popular registries)"
+    )]
     pub registries: Option<String>,
-    #[schemars(description = "Comma-separated model names to use (default: auto-detect from API keys)")]
+    #[schemars(
+        description = "Comma-separated model names to use (default: auto-detect from API keys)"
+    )]
     pub models: Option<String>,
 }
 
@@ -33,7 +34,9 @@ pub struct CheckNamesParams {
     pub names: Vec<String>,
     #[schemars(description = "Comma-separated TLDs to check (default: com,dev,io)")]
     pub tlds: Option<String>,
-    #[schemars(description = "Comma-separated registry IDs to check (default: popular registries)")]
+    #[schemars(
+        description = "Comma-separated registry IDs to check (default: popular registries)"
+    )]
     pub registries: Option<String>,
 }
 
@@ -56,7 +59,10 @@ fn parse_config(tlds: &Option<String>, registries: &Option<String>) -> Config {
         config.tlds = tlds.split(',').map(|s| s.trim().to_string()).collect();
     }
     if let Some(registries) = registries {
-        config.registry_ids = registries.split(',').map(|s| s.trim().to_string()).collect();
+        config.registry_ids = registries
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .collect();
     }
     config
 }
@@ -93,7 +99,8 @@ impl AvailableMcp {
         let mut config = parse_config(&params.tlds, &params.registries);
         config.max_names = params.max_names.unwrap_or(20);
 
-        let (candidates, errors) = generate::generate_names(&multi, &params.prompt, config.max_names).await;
+        let (candidates, errors) =
+            generate::generate_names(&multi, &params.prompt, config.max_names).await;
 
         if candidates.is_empty() {
             let error_msg = if errors.is_empty() {
@@ -101,7 +108,11 @@ impl AvailableMcp {
             } else {
                 format!(
                     "No valid names generated. Errors: {}",
-                    errors.iter().map(|e| format!("{}: {}", e.model, e.error)).collect::<Vec<_>>().join("; ")
+                    errors
+                        .iter()
+                        .map(|e| format!("{}: {}", e.model, e.error))
+                        .collect::<Vec<_>>()
+                        .join("; ")
                 )
             };
             return Err(McpError::internal_error(error_msg, None));
@@ -130,7 +141,10 @@ impl AvailableMcp {
             return Err(McpError::invalid_params("names list cannot be empty", None));
         }
         if params.names.len() > 50 {
-            return Err(McpError::invalid_params("Maximum 50 names per request", None));
+            return Err(McpError::invalid_params(
+                "Maximum 50 names per request",
+                None,
+            ));
         }
 
         let config = parse_config(&params.tlds, &params.registries);

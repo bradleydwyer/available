@@ -61,7 +61,10 @@ fn build_config(cli: &Cli) -> Config {
         config.tlds = tlds.split(',').map(|s| s.trim().to_string()).collect();
     }
     if let Some(ref registries) = cli.registries {
-        config.registry_ids = registries.split(',').map(|s| s.trim().to_string()).collect();
+        config.registry_ids = registries
+            .split(',')
+            .map(|s| s.trim().to_string())
+            .collect();
     }
     config.max_names = cli.max_names;
     config
@@ -115,7 +118,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         None => provider::default_models(),
     };
     if models.is_empty() {
-        eprintln!("No API keys found. Set at least one of: ANTHROPIC_API_KEY, OPENAI_API_KEY, GOOGLE_API_KEY, XAI_API_KEY");
+        eprintln!(
+            "No API keys found. Set at least one of: ANTHROPIC_API_KEY, OPENAI_API_KEY, GOOGLE_API_KEY, XAI_API_KEY"
+        );
         std::process::exit(1);
     }
 

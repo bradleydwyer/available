@@ -92,18 +92,18 @@ checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
 name = "available"
-version = "1.0.1"
+version = "1.1.0"
 dependencies = [
  "anyhow",
  "caucus-core",
  "clap",
- "domain-check",
  "dotenvy",
- "pkg-check",
+ "parked",
  "rmcp",
  "schemars",
  "serde",
  "serde_json",
+ "staked",
  "tokio",
 ]
 
@@ -381,21 +381,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "domain-check"
-version = "1.0.0"
-source = "git+https://github.com/bradleydwyer/domain-check?tag=v1.0.0#ebba97a1362d82d99a5515d53199a3b7da3d6ed4"
-dependencies = [
- "clap",
- "hickory-resolver",
- "reqwest 0.12.28",
- "rmcp",
- "schemars",
- "serde",
- "serde_json",
- "tokio",
 ]
 
 [[package]]
@@ -1243,6 +1228,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "parked"
+version = "2.0.0"
+source = "git+https://github.com/bradleydwyer/parked?tag=v2.0.0#b965a21af0da14d7763d65e0403fe26d5370d847"
+dependencies = [
+ "clap",
+ "hickory-resolver",
+ "reqwest 0.12.28",
+ "rmcp",
+ "schemars",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "parking_lot"
 version = "0.12.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1288,20 +1288,6 @@ name = "pin-utils"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
-
-[[package]]
-name = "pkg-check"
-version = "1.0.0"
-source = "git+https://github.com/bradleydwyer/pkg-check?tag=v1.0.0#fdb52ccd6d707a907221204a4af40b46ad80b2b6"
-dependencies = [
- "clap",
- "reqwest 0.12.28",
- "rmcp",
- "schemars",
- "serde",
- "serde_json",
- "tokio",
-]
 
 [[package]]
 name = "pkg-config"
@@ -1926,6 +1912,20 @@ name = "stable_deref_trait"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
+
+[[package]]
+name = "staked"
+version = "1.0.0"
+source = "git+https://github.com/bradleydwyer/staked?tag=v2.0.0#e368f1e722b2e35e2f9444e760512443cc23c8ee"
+dependencies = [
+ "clap",
+ "reqwest 0.12.28",
+ "rmcp",
+ "schemars",
+ "serde",
+ "serde_json",
+ "tokio",
+]
 
 [[package]]
 name = "strsim"

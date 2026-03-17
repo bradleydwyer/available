@@ -26,7 +26,11 @@ pub async fn check_names(candidates: &[NameCandidate], config: &Config) -> Vec<N
         }
     }
 
-    results.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap_or(std::cmp::Ordering::Equal));
+    results.sort_by(|a, b| {
+        b.score
+            .partial_cmp(&a.score)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
     results
 }
 
@@ -40,8 +44,8 @@ async fn check_single(candidate: &NameCandidate, config: &Config) -> NameResult 
     let registries = resolve_registries(&config.registry_ids);
 
     let (domain_results, pkg_result) = tokio::join!(
-        domain_check::checker::check_domains(&domains),
-        pkg_check::checker::check_package(&candidate.name, &registries),
+        parked::checker::check_domains(&domains),
+        staked::checker::check_package(&candidate.name, &registries),
     );
 
     let domain_summary = build_domain_summary(&domain_results);
@@ -58,11 +62,11 @@ async fn check_single(candidate: &NameCandidate, config: &Config) -> NameResult 
     result
 }
 
-fn resolve_registries(ids: &[String]) -> Vec<&'static pkg_check::registry::Registry> {
+fn resolve_registries(ids: &[String]) -> Vec<&'static staked::registry::Registry> {
     if ids.is_empty() {
-        pkg_check::registry::popular_registries()
+        staked::registry::popular_registries()
     } else {
-        pkg_check::registry::registries_by_ids(ids)
+        staked::registry::registries_by_ids(ids)
     }
 }
 

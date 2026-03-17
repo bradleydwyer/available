@@ -25,8 +25,8 @@ On tag push (`v*`):
 
 Switched from local path deps to git deps so `cargo install` works from a tarball:
 - `caucus-core` -> `git = "https://github.com/bradleydwyer/caucus"`
-- `domain-check` -> `git = "https://github.com/bradleydwyer/domain-check"`
-- `pkg-check` -> `git = "https://github.com/bradleydwyer/pkg-check"`
+- `parked` -> `git = "https://github.com/bradleydwyer/parked"`
+- `staked` -> `git = "https://github.com/bradleydwyer/staked"`
 
 ## First Release
 

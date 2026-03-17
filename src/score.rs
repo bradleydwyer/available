@@ -54,7 +54,7 @@ fn domain_tld(domain: &str) -> &str {
 }
 
 /// Build a DomainSummary from domain-check results.
-pub fn build_domain_summary(results: &[domain_check::types::DomainResult]) -> DomainSummary {
+pub fn build_domain_summary(results: &[parked::types::DomainResult]) -> DomainSummary {
     let details: Vec<DomainDetail> = results
         .iter()
         .map(|r| DomainDetail {
@@ -63,8 +63,14 @@ pub fn build_domain_summary(results: &[domain_check::types::DomainResult]) -> Do
         })
         .collect();
 
-    let available = details.iter().filter(|d| d.available == "available").count();
-    let registered = details.iter().filter(|d| d.available == "registered").count();
+    let available = details
+        .iter()
+        .filter(|d| d.available == "available")
+        .count();
+    let registered = details
+        .iter()
+        .filter(|d| d.available == "registered")
+        .count();
     let unknown = details.iter().filter(|d| d.available == "unknown").count();
 
     DomainSummary {
@@ -77,7 +83,7 @@ pub fn build_domain_summary(results: &[domain_check::types::DomainResult]) -> Do
 }
 
 /// Build a PackageSummary from pkg-check results.
-pub fn build_package_summary(result: &pkg_check::types::CheckResult) -> PackageSummary {
+pub fn build_package_summary(result: &staked::types::CheckResult) -> PackageSummary {
     let details: Vec<PackageDetail> = result
         .results
         .iter()
@@ -112,9 +118,18 @@ mod tests {
                 unknown: 0,
                 total: 3,
                 details: vec![
-                    DomainDetail { domain: "test.com".into(), available: "available".into() },
-                    DomainDetail { domain: "test.dev".into(), available: "available".into() },
-                    DomainDetail { domain: "test.io".into(), available: "available".into() },
+                    DomainDetail {
+                        domain: "test.com".into(),
+                        available: "available".into(),
+                    },
+                    DomainDetail {
+                        domain: "test.dev".into(),
+                        available: "available".into(),
+                    },
+                    DomainDetail {
+                        domain: "test.io".into(),
+                        available: "available".into(),
+                    },
                 ],
             },
             packages: PackageSummary {
@@ -123,8 +138,14 @@ mod tests {
                 unknown: 0,
                 total: 2,
                 details: vec![
-                    PackageDetail { registry: "npm".into(), available: "available".into() },
-                    PackageDetail { registry: "crates".into(), available: "available".into() },
+                    PackageDetail {
+                        registry: "npm".into(),
+                        available: "available".into(),
+                    },
+                    PackageDetail {
+                        registry: "crates".into(),
+                        available: "available".into(),
+                    },
                 ],
             },
         };
@@ -146,9 +167,18 @@ mod tests {
                 unknown: 3,
                 total: 3,
                 details: vec![
-                    DomainDetail { domain: "test.com".into(), available: "unknown".into() },
-                    DomainDetail { domain: "test.dev".into(), available: "unknown".into() },
-                    DomainDetail { domain: "test.io".into(), available: "unknown".into() },
+                    DomainDetail {
+                        domain: "test.com".into(),
+                        available: "unknown".into(),
+                    },
+                    DomainDetail {
+                        domain: "test.dev".into(),
+                        available: "unknown".into(),
+                    },
+                    DomainDetail {
+                        domain: "test.io".into(),
+                        available: "unknown".into(),
+                    },
                 ],
             },
             packages: PackageSummary {
@@ -157,8 +187,14 @@ mod tests {
                 unknown: 2,
                 total: 2,
                 details: vec![
-                    PackageDetail { registry: "npm".into(), available: "unknown".into() },
-                    PackageDetail { registry: "crates".into(), available: "unknown".into() },
+                    PackageDetail {
+                        registry: "npm".into(),
+                        available: "unknown".into(),
+                    },
+                    PackageDetail {
+                        registry: "crates".into(),
+                        available: "unknown".into(),
+                    },
                 ],
             },
         };
@@ -177,9 +213,18 @@ mod tests {
                 unknown: 0,
                 total: 3,
                 details: vec![
-                    DomainDetail { domain: "test.com".into(), available: "registered".into() },
-                    DomainDetail { domain: "test.dev".into(), available: "registered".into() },
-                    DomainDetail { domain: "test.io".into(), available: "registered".into() },
+                    DomainDetail {
+                        domain: "test.com".into(),
+                        available: "registered".into(),
+                    },
+                    DomainDetail {
+                        domain: "test.dev".into(),
+                        available: "registered".into(),
+                    },
+                    DomainDetail {
+                        domain: "test.io".into(),
+                        available: "registered".into(),
+                    },
                 ],
             },
             packages: PackageSummary {
@@ -188,8 +233,14 @@ mod tests {
                 unknown: 0,
                 total: 2,
                 details: vec![
-                    PackageDetail { registry: "npm".into(), available: "taken".into() },
-                    PackageDetail { registry: "crates".into(), available: "taken".into() },
+                    PackageDetail {
+                        registry: "npm".into(),
+                        available: "taken".into(),
+                    },
+                    PackageDetail {
+                        registry: "crates".into(),
+                        available: "taken".into(),
+                    },
                 ],
             },
         };

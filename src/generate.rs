@@ -64,7 +64,9 @@ fn parse_names(response: &str) -> Vec<String> {
         .filter_map(|line| {
             let cleaned = line
                 .trim()
-                .trim_start_matches(|c: char| c.is_ascii_digit() || c == '.' || c == ')' || c == '-' || c == '*')
+                .trim_start_matches(|c: char| {
+                    c.is_ascii_digit() || c == '.' || c == ')' || c == '-' || c == '*'
+                })
                 .trim()
                 .trim_matches('`')
                 .trim_matches('*')
