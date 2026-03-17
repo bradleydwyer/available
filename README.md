@@ -1,28 +1,24 @@
 # available
 
-AI-powered project name finder — generates names via LLMs and checks domain + package registry availability in one shot.
+Find project names that are actually available. Generates candidates with LLMs, then checks domains and package registries in one shot.
 
-## About
+Built on [caucus](https://github.com/bradleydwyer/caucus), [domain-check](https://github.com/bradleydwyer/domain-check), and [pkg-check](https://github.com/bradleydwyer/pkg-check). Also runs as an MCP server.
 
-When starting a new project, finding a name that's available across domains and package registries is tedious manual work. `available` combines [caucus](https://github.com/bradleydwyer/caucus) (multi-LLM generation), [domain-check](https://github.com/bradleydwyer/domain-check), and [pkg-check](https://github.com/bradleydwyer/pkg-check) into a single tool that generates name suggestions and checks their availability in one command.
+## Install
 
-It also runs as an MCP server, so AI assistants can find available project names directly.
-
-## Installation
-
-**Homebrew (macOS):**
 ```bash
 brew install bradleydwyer/tap/available
 ```
 
-**From source (requires Rust 1.85+):**
+Or from source (Rust 1.85+):
+
 ```bash
 cargo install --git https://github.com/bradleydwyer/available
 ```
 
 ### API keys
 
-At least one LLM API key is required for name generation. Set them as environment variables or in a `.env` file:
+Name generation needs at least one LLM API key. Set them as environment variables or in a `.env` file:
 
 ```bash
 ANTHROPIC_API_KEY=sk-...    # Claude
@@ -31,7 +27,7 @@ GOOGLE_API_KEY=...          # Gemini
 XAI_API_KEY=...             # Grok
 ```
 
-Set multiple keys to get suggestions from several models at once. The `--check` mode works without any API keys.
+Multiple keys means suggestions from multiple models. The `--check` mode works without any keys.
 
 ## Usage
 
@@ -49,7 +45,7 @@ Checking 14 names...
 
 ### Check specific names
 
-No LLM needed — just check names you already have in mind:
+No LLM needed. Just check names you already have:
 
 ```
 $ available --check aurora,drift,nexus
@@ -98,7 +94,7 @@ Returns structured JSON with per-name scores, domain details, and package regist
 available mcp
 ```
 
-Exposes three tools over stdio:
+Three tools over stdio:
 
 | Tool | Description |
 |------|-------------|
@@ -106,7 +102,7 @@ Exposes three tools over stdio:
 | `check_names` | Check specific names (up to 50) |
 | `list_models` | Show configured LLM providers |
 
-#### Claude Code configuration
+Claude Code config:
 
 ```json
 {
@@ -119,19 +115,19 @@ Exposes three tools over stdio:
 }
 ```
 
-## How scoring works
+## Scoring
 
-Each name gets a score from 0% to 100% based on availability:
+Each name gets a 0-100% score based on availability:
 
 | Component | Weight |
 |-----------|--------|
 | .com domain | 30% |
 | .dev domain | 10% |
 | .io domain | 10% |
-| Package registries | 50% (split evenly across checked registries) |
+| Package registries | 50% (split evenly) |
 
-Available = full credit, unknown = half credit, taken/registered = zero.
+Available = full credit, unknown = half, taken = zero.
 
 ## License
 
-available is licensed under the MIT license. See the [`LICENSE`](LICENSE) file for details.
+MIT
