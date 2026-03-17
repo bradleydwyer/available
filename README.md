@@ -1,5 +1,9 @@
 # available
 
+<p align="center">
+  <img src="logos/available-logo-2.png" width="256" alt="available logo" />
+</p>
+
 Find project names that are actually available. Generates candidates with LLMs, then checks domains and package registries in one shot.
 
 Built on [caucus](https://github.com/bradleydwyer/caucus), [domain-check](https://github.com/bradleydwyer/domain-check), and [pkg-check](https://github.com/bradleydwyer/pkg-check). Also runs as an MCP server.
