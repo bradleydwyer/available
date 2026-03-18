@@ -28,13 +28,17 @@ struct Cli {
     #[arg(long)]
     models: Option<String>,
 
-    /// Comma-separated TLDs to check (default: com,dev,io)
+    /// Comma-separated TLDs to check (default: com,dev,io,app)
     #[arg(long)]
     tlds: Option<String>,
 
     /// Comma-separated registry IDs (default: popular registries)
     #[arg(long)]
     registries: Option<String>,
+
+    /// Comma-separated app store IDs to check (default: app_store, google_play)
+    #[arg(long)]
+    stores: Option<String>,
 
     /// Maximum number of names to generate (default: 20)
     #[arg(long, default_value = "20")]
@@ -65,6 +69,9 @@ fn build_config(cli: &Cli) -> Config {
             .split(',')
             .map(|s| s.trim().to_string())
             .collect();
+    }
+    if let Some(ref stores) = cli.stores {
+        config.store_ids = stores.split(',').map(|s| s.trim().to_string()).collect();
     }
     config.max_names = cli.max_names;
     config
@@ -162,17 +169,29 @@ fn print_results(results: &[NameResult], verbose: bool) {
         let com_status = domain_status(&result.domains.details, "com");
         let dev_status = domain_status(&result.domains.details, "dev");
         let io_status = domain_status(&result.domains.details, "io");
+        let app_status = domain_status(&result.domains.details, "app");
+
+        let store_info = if result.stores.total > 0 {
+            format!(
+                "  stores: {}/{}",
+                result.stores.available, result.stores.total
+            )
+        } else {
+            String::new()
+        };
 
         println!(
-            "  {bar} {score:.0}%  {name:<20} .com{com} .dev{dev} .io{io}  pkg: {pkg_avail}/{pkg_total} available",
+            "  {bar} {score:.0}%  {name:<20} .com{com} .dev{dev} .io{io} .app{app}  pkg: {pkg_avail}/{pkg_total} available{stores}",
             bar = bar,
             score = result.score * 100.0,
             name = result.name,
             com = com_status,
             dev = dev_status,
             io = io_status,
+            app = app_status,
             pkg_avail = result.packages.available,
             pkg_total = result.packages.total,
+            stores = store_info,
         );
 
         if verbose {
@@ -181,11 +200,26 @@ fn print_results(results: &[NameResult], verbose: bool) {
             }
             for d in &result.domains.details {
                 let symbol = availability_symbol(&d.available);
-                println!("         {symbol} {:<24} {}", d.domain, d.available);
+                let site_info = d
+                    .site
+                    .as_deref()
+                    .map(|s| format!(" ({s})"))
+                    .unwrap_or_default();
+                println!(
+                    "         {symbol} {:<24} {}{}",
+                    d.domain, d.available, site_info
+                );
             }
             for p in &result.packages.details {
                 let symbol = availability_symbol(&p.available);
                 println!("         {symbol} {:<24} {}", p.registry, p.available);
+            }
+            for s in &result.stores.details {
+                let symbol = availability_symbol(&s.available);
+                println!(
+                    "         {symbol} {:<24} {} ({} similar)",
+                    s.store, s.available, s.similar_count
+                );
             }
             println!();
         }
@@ -198,17 +232,23 @@ fn score_bar(score: f64) -> String {
     format!("[{}{}]", "#".repeat(filled), "-".repeat(empty))
 }
 
-fn domain_status(details: &[available::types::DomainDetail], tld: &str) -> &'static str {
+fn domain_status(details: &[available::types::DomainDetail], tld: &str) -> String {
     for d in details {
         if d.domain.ends_with(&format!(".{tld}")) {
             return match d.available.as_str() {
-                "available" => "[+]",
-                "registered" => "[-]",
-                _ => "[?]",
+                "available" => "[+]".into(),
+                "registered" => match d.site.as_deref() {
+                    Some("parked") => "[-P]".into(),
+                    Some("active") => "[-A]".into(),
+                    Some("redirect") => "[-R]".into(),
+                    Some("unreachable") => "[-X]".into(),
+                    _ => "[-]".into(),
+                },
+                _ => "[?]".into(),
             };
         }
     }
-    "   "
+    "   ".into()
 }
 
 fn availability_symbol(status: &str) -> &'static str {

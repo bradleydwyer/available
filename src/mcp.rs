@@ -23,6 +23,10 @@ pub struct FindNamesParams {
     )]
     pub registries: Option<String>,
     #[schemars(
+        description = "Comma-separated app store IDs to check (app_store, google_play). Not checked by default."
+    )]
+    pub stores: Option<String>,
+    #[schemars(
         description = "Comma-separated model names to use (default: auto-detect from API keys)"
     )]
     pub models: Option<String>,
@@ -38,6 +42,10 @@ pub struct CheckNamesParams {
         description = "Comma-separated registry IDs to check (default: popular registries)"
     )]
     pub registries: Option<String>,
+    #[schemars(
+        description = "Comma-separated app store IDs to check (app_store, google_play). Not checked by default."
+    )]
+    pub stores: Option<String>,
 }
 
 #[derive(Debug, Deserialize, JsonSchema)]
@@ -53,7 +61,11 @@ impl Default for AvailableMcp {
     }
 }
 
-fn parse_config(tlds: &Option<String>, registries: &Option<String>) -> Config {
+fn parse_config(
+    tlds: &Option<String>,
+    registries: &Option<String>,
+    stores: &Option<String>,
+) -> Config {
     let mut config = Config::default();
     if let Some(tlds) = tlds {
         config.tlds = tlds.split(',').map(|s| s.trim().to_string()).collect();
@@ -63,6 +75,9 @@ fn parse_config(tlds: &Option<String>, registries: &Option<String>) -> Config {
             .split(',')
             .map(|s| s.trim().to_string())
             .collect();
+    }
+    if let Some(stores) = stores {
+        config.store_ids = stores.split(',').map(|s| s.trim().to_string()).collect();
     }
     config
 }
@@ -96,7 +111,7 @@ impl AvailableMcp {
         let multi = provider::build_provider(&models)
             .map_err(|e| McpError::internal_error(e.to_string(), None))?;
 
-        let mut config = parse_config(&params.tlds, &params.registries);
+        let mut config = parse_config(&params.tlds, &params.registries, &params.stores);
         config.max_names = params.max_names.unwrap_or(20);
 
         let (candidates, errors) =
@@ -147,7 +162,7 @@ impl AvailableMcp {
             ));
         }
 
-        let config = parse_config(&params.tlds, &params.registries);
+        let config = parse_config(&params.tlds, &params.registries, &params.stores);
         let candidates: Vec<NameCandidate> = params
             .names
             .iter()

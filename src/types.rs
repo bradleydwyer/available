@@ -21,6 +21,8 @@ pub struct DomainSummary {
 pub struct DomainDetail {
     pub domain: String,
     pub available: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub site: Option<String>,
 }
 
 /// Compact package registry availability summary.
@@ -39,6 +41,23 @@ pub struct PackageDetail {
     pub available: String,
 }
 
+/// Compact app store availability summary.
+#[derive(Debug, Clone, Serialize)]
+pub struct StoreSummary {
+    pub available: usize,
+    pub taken: usize,
+    pub unknown: usize,
+    pub total: usize,
+    pub details: Vec<StoreDetail>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct StoreDetail {
+    pub store: String,
+    pub available: String,
+    pub similar_count: usize,
+}
+
 /// A fully-checked name with score and availability details.
 #[derive(Debug, Clone, Serialize)]
 pub struct NameResult {
@@ -47,6 +66,7 @@ pub struct NameResult {
     pub suggested_by: Vec<String>,
     pub domains: DomainSummary,
     pub packages: PackageSummary,
+    pub stores: StoreSummary,
 }
 
 /// The full output of a find_names or check_names operation.
@@ -69,14 +89,16 @@ pub struct GenerationError {
 pub struct Config {
     pub tlds: Vec<String>,
     pub registry_ids: Vec<String>,
+    pub store_ids: Vec<String>,
     pub max_names: usize,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Self {
-            tlds: vec!["com".into(), "dev".into(), "io".into()],
+            tlds: vec!["com".into(), "dev".into(), "io".into(), "app".into()],
             registry_ids: vec![],
+            store_ids: vec![],
             max_names: 20,
         }
     }

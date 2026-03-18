@@ -7,7 +7,8 @@ license = "MIT"
 
 [dependencies]
 caucus-core = { git = "https://github.com/bradleydwyer/caucus", tag = "v1.0.0", package = "caucus-core" }
-parked = { git = "https://github.com/bradleydwyer/parked", tag = "v2.0.0" }
+parked = { git = "https://github.com/bradleydwyer/parked", tag = "v2.2.0" }
+published = { path = "../published" }
 staked = { git = "https://github.com/bradleydwyer/staked", tag = "v2.0.0" }
 clap = { version = "4", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }

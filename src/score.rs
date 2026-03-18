@@ -1,43 +1,75 @@
-use crate::types::{DomainDetail, DomainSummary, NameResult, PackageDetail, PackageSummary};
+use crate::types::{
+    DomainDetail, DomainSummary, NameResult, PackageDetail, PackageSummary, StoreDetail,
+    StoreSummary,
+};
 
-/// Score a name result based on domain and package availability.
+/// Score a name result based on domain, package, and store availability.
 ///
-/// Weights:
-/// - .com domain: 30%
-/// - .dev domain: 10%
-/// - .io domain: 10%
+/// Without stores:
+/// - .com domain: 30%, .dev: 10%, .io: 10%
 /// - Package registries: 50% (split evenly)
+///
+/// With stores:
+/// - .com domain: 24%, .dev: 8%, .io: 8%
+/// - Package registries: 40% (split evenly)
+/// - App stores: 20% (split evenly)
 pub fn score(result: &NameResult) -> f64 {
-    let domain_score = score_domains(&result.domains);
-    let package_score = score_packages(&result.packages);
-    let raw = domain_score + package_score;
+    let has_stores = result.stores.total > 0;
+    let domain_score = score_domains(&result.domains, has_stores);
+    let package_score = score_packages(&result.packages, has_stores);
+    let store_score = score_stores(&result.stores);
+    let raw = domain_score + package_score + store_score;
 
     (raw * 10000.0).round() / 10000.0
 }
 
-fn score_domains(summary: &DomainSummary) -> f64 {
+fn score_domains(summary: &DomainSummary, has_stores: bool) -> f64 {
     let mut total = 0.0;
     for detail in &summary.details {
-        let weight = match domain_tld(&detail.domain) {
-            "com" => 0.30,
-            "dev" => 0.10,
-            "io" => 0.10,
-            _ => 0.0,
+        let weight = if has_stores {
+            match domain_tld(&detail.domain) {
+                "com" => 0.20,
+                "dev" => 0.07,
+                "io" => 0.07,
+                "app" => 0.06,
+                _ => 0.0,
+            }
+        } else {
+            match domain_tld(&detail.domain) {
+                "com" => 0.25,
+                "dev" => 0.09,
+                "io" => 0.09,
+                "app" => 0.07,
+                _ => 0.0,
+            }
         };
         total += weight * availability_score(&detail.available);
     }
     total
 }
 
-fn score_packages(summary: &PackageSummary) -> f64 {
+fn score_packages(summary: &PackageSummary, has_stores: bool) -> f64 {
     if summary.details.is_empty() {
         return 0.0;
     }
-    let weight_per_registry = 0.50 / summary.details.len() as f64;
+    let total_weight = if has_stores { 0.40 } else { 0.50 };
+    let weight_per_registry = total_weight / summary.details.len() as f64;
     summary
         .details
         .iter()
         .map(|d| weight_per_registry * availability_score(&d.available))
+        .sum()
+}
+
+fn score_stores(summary: &StoreSummary) -> f64 {
+    if summary.details.is_empty() {
+        return 0.0;
+    }
+    let weight_per_store = 0.20 / summary.details.len() as f64;
+    summary
+        .details
+        .iter()
+        .map(|d| weight_per_store * availability_score(&d.available))
         .sum()
 }
 
@@ -60,6 +92,10 @@ pub fn build_domain_summary(results: &[parked::types::DomainResult]) -> DomainSu
         .map(|r| DomainDetail {
             domain: r.domain.clone(),
             available: format!("{}", r.available).to_lowercase(),
+            site: r
+                .site
+                .as_ref()
+                .map(|s| format!("{}", s.classification).to_lowercase()),
         })
         .collect();
 
@@ -78,6 +114,27 @@ pub fn build_domain_summary(results: &[parked::types::DomainResult]) -> DomainSu
         registered,
         unknown,
         total: details.len(),
+        details,
+    }
+}
+
+/// Build a StoreSummary from app-store-check results.
+pub fn build_store_summary(result: &published::types::CheckResult) -> StoreSummary {
+    let details: Vec<StoreDetail> = result
+        .results
+        .iter()
+        .map(|r| StoreDetail {
+            store: r.store_name.clone(),
+            available: format!("{}", r.available).to_lowercase(),
+            similar_count: r.similar_count,
+        })
+        .collect();
+
+    StoreSummary {
+        available: result.summary.available,
+        taken: result.summary.taken,
+        unknown: result.summary.unknown,
+        total: result.summary.total,
         details,
     }
 }
@@ -113,22 +170,30 @@ mod tests {
             score: 0.0,
             suggested_by: vec![],
             domains: DomainSummary {
-                available: 3,
+                available: 4,
                 registered: 0,
                 unknown: 0,
-                total: 3,
+                total: 4,
                 details: vec![
                     DomainDetail {
                         domain: "test.com".into(),
                         available: "available".into(),
+                        site: None,
                     },
                     DomainDetail {
                         domain: "test.dev".into(),
                         available: "available".into(),
+                        site: None,
                     },
                     DomainDetail {
                         domain: "test.io".into(),
                         available: "available".into(),
+                        site: None,
+                    },
+                    DomainDetail {
+                        domain: "test.app".into(),
+                        available: "available".into(),
+                        site: None,
                     },
                 ],
             },
@@ -148,6 +213,13 @@ mod tests {
                     },
                 ],
             },
+            stores: StoreSummary {
+                available: 0,
+                taken: 0,
+                unknown: 0,
+                total: 0,
+                details: vec![],
+            },
         };
         let s = score(&result);
         assert!((s - 1.0).abs() < 0.001);
@@ -164,20 +236,28 @@ mod tests {
             domains: DomainSummary {
                 available: 0,
                 registered: 0,
-                unknown: 3,
-                total: 3,
+                unknown: 4,
+                total: 4,
                 details: vec![
                     DomainDetail {
                         domain: "test.com".into(),
                         available: "unknown".into(),
+                        site: None,
                     },
                     DomainDetail {
                         domain: "test.dev".into(),
                         available: "unknown".into(),
+                        site: None,
                     },
                     DomainDetail {
                         domain: "test.io".into(),
                         available: "unknown".into(),
+                        site: None,
+                    },
+                    DomainDetail {
+                        domain: "test.app".into(),
+                        available: "unknown".into(),
+                        site: None,
                     },
                 ],
             },
@@ -197,6 +277,13 @@ mod tests {
                     },
                 ],
             },
+            stores: StoreSummary {
+                available: 0,
+                taken: 0,
+                unknown: 0,
+                total: 0,
+                details: vec![],
+            },
         };
         assert_eq!(score(&result), 0.5);
     }
@@ -209,21 +296,29 @@ mod tests {
             suggested_by: vec![],
             domains: DomainSummary {
                 available: 0,
-                registered: 3,
+                registered: 4,
                 unknown: 0,
-                total: 3,
+                total: 4,
                 details: vec![
                     DomainDetail {
                         domain: "test.com".into(),
                         available: "registered".into(),
+                        site: None,
                     },
                     DomainDetail {
                         domain: "test.dev".into(),
                         available: "registered".into(),
+                        site: None,
                     },
                     DomainDetail {
                         domain: "test.io".into(),
                         available: "registered".into(),
+                        site: None,
+                    },
+                    DomainDetail {
+                        domain: "test.app".into(),
+                        available: "registered".into(),
+                        site: None,
                     },
                 ],
             },
@@ -242,6 +337,13 @@ mod tests {
                         available: "taken".into(),
                     },
                 ],
+            },
+            stores: StoreSummary {
+                available: 0,
+                taken: 0,
+                unknown: 0,
+                total: 0,
+                details: vec![],
             },
         };
         let s = score(&result);
