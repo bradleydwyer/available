@@ -1,6 +1,6 @@
 [package]
 name = "available"
-version = "1.1.0"
+version = "1.2.0"
 edition = "2024"
 description = "AI-powered project name finder — generates names via LLMs and checks domain + package registry availability"
 license = "MIT"
