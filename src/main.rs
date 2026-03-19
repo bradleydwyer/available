@@ -118,8 +118,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let multi = provider::build_provider(&models)?;
         eprintln!("Generating names with: {}", models.join(", "));
 
-        let (candidates, errors) =
-            generate::generate_names(&multi, &input, config.max_names).await;
+        let (candidates, errors) = generate::generate_names(&multi, &input, config.max_names).await;
 
         for error in &errors {
             eprintln!("Warning: {} failed: {}", error.model, error.error);
