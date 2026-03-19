@@ -89,6 +89,8 @@ pub struct GenerationError {
 pub struct Config {
     pub tlds: Vec<String>,
     pub registry_ids: Vec<String>,
+    pub all_registries: bool,
+    pub languages: Vec<String>,
     pub store_ids: Vec<String>,
     pub max_names: usize,
 }
@@ -98,6 +100,8 @@ impl Default for Config {
         Self {
             tlds: vec!["com".into(), "dev".into(), "io".into(), "app".into()],
             registry_ids: vec![],
+            all_registries: false,
+            languages: vec![],
             store_ids: vec![],
             max_names: 20,
         }

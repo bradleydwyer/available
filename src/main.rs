@@ -32,9 +32,21 @@ struct Cli {
     #[arg(long)]
     tlds: Option<String>,
 
+    /// Check all common TLDs (~130)
+    #[arg(long)]
+    all_tlds: bool,
+
     /// Comma-separated registry IDs (default: popular registries)
     #[arg(long)]
     registries: Option<String>,
+
+    /// Check all registries (~30)
+    #[arg(long)]
+    all_registries: bool,
+
+    /// Filter registries by language (e.g. rust,python,javascript)
+    #[arg(long)]
+    languages: Option<String>,
 
     /// Comma-separated app store IDs to check (default: app_store, google_play)
     #[arg(long)]
@@ -61,10 +73,19 @@ enum Command {
 
 fn build_config(cli: &Cli) -> Config {
     let mut config = Config::default();
-    if let Some(ref tlds) = cli.tlds {
+    if cli.all_tlds {
+        config.tlds = parked::tlds::COMMON_TLDS
+            .iter()
+            .map(|s| s.to_string())
+            .collect();
+    } else if let Some(ref tlds) = cli.tlds {
         config.tlds = tlds.split(',').map(|s| s.trim().to_string()).collect();
     }
-    if let Some(ref registries) = cli.registries {
+    if let Some(ref langs) = cli.languages {
+        config.languages = langs.split(',').map(|s| s.trim().to_string()).collect();
+    } else if cli.all_registries {
+        config.all_registries = true;
+    } else if let Some(ref registries) = cli.registries {
         config.registry_ids = registries
             .split(',')
             .map(|s| s.trim().to_string())
@@ -171,10 +192,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 fn print_results(results: &[NameResult], verbose: bool) {
     for result in results {
         let bar = score_bar(result.score);
-        let com_status = domain_status(&result.domains.details, "com");
-        let dev_status = domain_status(&result.domains.details, "dev");
-        let io_status = domain_status(&result.domains.details, "io");
-        let app_status = domain_status(&result.domains.details, "app");
 
         let store_info = if result.stores.total > 0 {
             format!(
@@ -185,19 +202,39 @@ fn print_results(results: &[NameResult], verbose: bool) {
             String::new()
         };
 
-        println!(
-            "  {bar} {score:.0}%  {name:<20} .com{com} .dev{dev} .io{io} .app{app}  pkg: {pkg_avail}/{pkg_total} available{stores}",
-            bar = bar,
-            score = result.score * 100.0,
-            name = result.name,
-            com = com_status,
-            dev = dev_status,
-            io = io_status,
-            app = app_status,
-            pkg_avail = result.packages.available,
-            pkg_total = result.packages.total,
-            stores = store_info,
-        );
+        // Use compact TLD display for <= 6 TLDs, summary for more
+        if result.domains.total <= 6 {
+            let com_status = domain_status(&result.domains.details, "com");
+            let dev_status = domain_status(&result.domains.details, "dev");
+            let io_status = domain_status(&result.domains.details, "io");
+            let app_status = domain_status(&result.domains.details, "app");
+
+            println!(
+                "  {bar} {score:.0}%  {name:<20} .com{com} .dev{dev} .io{io} .app{app}  pkg: {pkg_avail}/{pkg_total}{stores}",
+                bar = bar,
+                score = result.score * 100.0,
+                name = result.name,
+                com = com_status,
+                dev = dev_status,
+                io = io_status,
+                app = app_status,
+                pkg_avail = result.packages.available,
+                pkg_total = result.packages.total,
+                stores = store_info,
+            );
+        } else {
+            println!(
+                "  {bar} {score:.0}%  {name:<20} domains: {dom_avail}/{dom_total}  pkg: {pkg_avail}/{pkg_total}{stores}",
+                bar = bar,
+                score = result.score * 100.0,
+                name = result.name,
+                dom_avail = result.domains.available,
+                dom_total = result.domains.total,
+                pkg_avail = result.packages.available,
+                pkg_total = result.packages.total,
+                stores = store_info,
+            );
+        }
 
         if verbose {
             if !result.suggested_by.is_empty() {

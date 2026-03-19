@@ -1,13 +1,13 @@
 [package]
 name = "available"
-version = "1.3.0"
+version = "1.4.0"
 edition = "2024"
-description = "AI-powered project name finder — generates names via LLMs and checks domain + package registry availability"
+description = "Check project name availability across domains and package registries"
 license = "MIT"
 
 [dependencies]
 caucus-core = { git = "https://github.com/bradleydwyer/caucus", tag = "v1.0.2", package = "caucus-core" }
-parked = { git = "https://github.com/bradleydwyer/parked", tag = "v2.2.5" }
+parked = { git = "https://github.com/bradleydwyer/parked", tag = "v2.3.0" }
 published = { git = "https://github.com/bradleydwyer/published", tag = "v1.0.2" }
 staked = { git = "https://github.com/bradleydwyer/staked", tag = "v2.0.3" }
 clap = { version = "4", features = ["derive"] }

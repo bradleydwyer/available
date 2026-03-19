@@ -4,7 +4,7 @@
   <img src="logos/available-logo-2.png" width="256" alt="available logo" />
 </p>
 
-Find project names that are actually available. Generates candidates with LLMs, then checks domains and package registries in one shot.
+Check project name availability across domains and package registries. Optionally generate candidates with LLMs.
 
 Built on [caucus](https://github.com/bradleydwyer/caucus), [parked](https://github.com/bradleydwyer/parked), and [staked](https://github.com/bradleydwyer/staked). Also runs as an MCP server.
 
@@ -31,14 +31,25 @@ GOOGLE_API_KEY=...          # Gemini
 XAI_API_KEY=...             # Grok
 ```
 
-Multiple keys means suggestions from multiple models. The `--check` mode works without any keys.
+Multiple keys means suggestions from multiple models. Checking names works without any keys.
 
 ## Usage
 
-### Generate names
+### Check names (default)
 
 ```
-$ available "a fast task queue for Rust"
+$ available aurora drift nexus
+  [######----]  62%  aurora               .com[-] .dev[+] .io[+]  pkg: 7/10 available
+  [########--]  78%  drift                .com[+] .dev[+] .io[-]  pkg: 9/10 available
+  [####------]  40%  nexus                .com[-] .dev[-] .io[-]  pkg: 8/10 available
+```
+
+### Generate names
+
+Use `--generate` to have LLMs brainstorm candidates:
+
+```
+$ available --generate "a fast task queue for Rust"
 Generating names with: claude-opus-4-6, gpt-5.2
 Checking 14 names...
   [########--]  80%  rushq                .com[+] .dev[+] .io[+]  pkg: 9/10 available
@@ -47,21 +58,10 @@ Checking 14 names...
   ...
 ```
 
-### Check specific names
-
-No LLM needed. Just check names you already have:
-
-```
-$ available --check aurora,drift,nexus
-  [######----]  62%  aurora               .com[-] .dev[+] .io[+]  pkg: 7/10 available
-  [########--]  78%  drift                .com[+] .dev[+] .io[-]  pkg: 9/10 available
-  [####------]  40%  nexus                .com[-] .dev[-] .io[-]  pkg: 8/10 available
-```
-
 ### Options
 
 ```
-    --check <NAMES>        Check specific names (comma-separated, no LLM needed)
+    --generate             Generate names from a description instead of checking
     --models <MODELS>      Comma-separated model names (default: auto-detect from API keys)
     --tlds <TLDS>          Comma-separated TLDs to check (default: com,dev,io)
     --registries <IDS>     Comma-separated registry IDs (default: popular 10)
@@ -73,7 +73,7 @@ $ available --check aurora,drift,nexus
 ### Verbose output
 
 ```
-$ available --check aurora --verbose
+$ available aurora --verbose
   [######----]  62%  aurora               .com[-] .dev[+] .io[+]  pkg: 7/10 available
          [-] aurora.com                registered
          [+] aurora.dev                available
@@ -87,7 +87,7 @@ $ available --check aurora --verbose
 ### JSON output
 
 ```bash
-available --check aurora --json
+available aurora --json
 ```
 
 Returns structured JSON with per-name scores, domain details, and package registry results.

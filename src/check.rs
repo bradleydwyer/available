@@ -41,7 +41,7 @@ async fn check_single(candidate: &NameCandidate, config: &Config) -> NameResult 
         .map(|tld| format!("{}.{}", candidate.name, tld))
         .collect();
 
-    let registries = resolve_registries(&config.registry_ids);
+    let registries = resolve_registries(config);
     let stores = resolve_stores(&config.store_ids);
 
     let parked_opts = parked::checker::CheckOptions::default();
@@ -67,11 +67,15 @@ async fn check_single(candidate: &NameCandidate, config: &Config) -> NameResult 
     result
 }
 
-fn resolve_registries(ids: &[String]) -> Vec<&'static staked::registry::Registry> {
-    if ids.is_empty() {
+fn resolve_registries(config: &Config) -> Vec<&'static staked::registry::Registry> {
+    if !config.languages.is_empty() {
+        staked::registry::registries_by_languages(&config.languages)
+    } else if config.all_registries {
+        staked::registry::all_registries().iter().collect()
+    } else if config.registry_ids.is_empty() {
         staked::registry::popular_registries()
     } else {
-        staked::registry::registries_by_ids(ids)
+        staked::registry::registries_by_ids(&config.registry_ids)
     }
 }
 

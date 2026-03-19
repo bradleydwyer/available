@@ -92,7 +92,7 @@ checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
 name = "available"
-version = "1.2.5"
+version = "1.4.0"
 dependencies = [
  "anyhow",
  "caucus-core",
@@ -971,8 +971,8 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "parked"
-version = "2.2.5"
-source = "git+https://github.com/bradleydwyer/parked?tag=v2.2.5#2b505904405faed3b96d1f9f3be8d42406f9b9d1"
+version = "2.3.0"
+source = "git+https://github.com/bradleydwyer/parked?tag=v2.3.0#87f9d467cc2f45158f579f0764b418965537b099"
 dependencies = [
  "clap",
  "hickory-resolver",

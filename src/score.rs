@@ -5,14 +5,11 @@ use crate::types::{
 
 /// Score a name result based on domain, package, and store availability.
 ///
-/// Without stores:
-/// - .com domain: 30%, .dev: 10%, .io: 10%
-/// - Package registries: 50% (split evenly)
-///
-/// With stores:
-/// - .com domain: 24%, .dev: 8%, .io: 8%
-/// - Package registries: 40% (split evenly)
-/// - App stores: 20% (split evenly)
+/// Weight distribution (adjusts dynamically based on what's checked):
+/// - Domains: 50% (without stores) or 40% (with stores)
+///   - .com gets half the domain budget, rest split evenly
+/// - Package registries: 50% (without stores) or 40% (with stores)
+/// - App stores: 20% (when present)
 pub fn score(result: &NameResult) -> f64 {
     let has_stores = result.stores.total > 0;
     let domain_score = score_domains(&result.domains, has_stores);
@@ -24,24 +21,20 @@ pub fn score(result: &NameResult) -> f64 {
 }
 
 fn score_domains(summary: &DomainSummary, has_stores: bool) -> f64 {
+    if summary.details.is_empty() {
+        return 0.0;
+    }
+    let total_weight = if has_stores { 0.40 } else { 0.50 };
+    let com_weight = total_weight / 2.0;
+    let other_count = summary.details.len().saturating_sub(1).max(1);
+    let other_weight = (total_weight - com_weight) / other_count as f64;
+
     let mut total = 0.0;
     for detail in &summary.details {
-        let weight = if has_stores {
-            match domain_tld(&detail.domain) {
-                "com" => 0.20,
-                "dev" => 0.07,
-                "io" => 0.07,
-                "app" => 0.06,
-                _ => 0.0,
-            }
+        let weight = if domain_tld(&detail.domain) == "com" {
+            com_weight
         } else {
-            match domain_tld(&detail.domain) {
-                "com" => 0.25,
-                "dev" => 0.09,
-                "io" => 0.09,
-                "app" => 0.07,
-                _ => 0.0,
-            }
+            other_weight
         };
         total += weight * availability_score(&detail.available);
     }
