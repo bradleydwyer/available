@@ -62,6 +62,14 @@ struct Cli {
     /// Show per-registry and per-domain detail
     #[arg(short, long)]
     verbose: bool,
+
+    /// In verbose mode, only show available entries
+    #[arg(long)]
+    free: bool,
+
+    /// In verbose mode, also show "maybe" entries (parked/unreachable domains)
+    #[arg(long)]
+    maybe: bool,
 }
 
 fn build_config(cli: &Cli) -> Config {
@@ -146,7 +154,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         if cli.json {
             println!("{}", serde_json::to_string_pretty(&output)?);
         } else {
-            print_results(&output.results, cli.verbose);
+            print_results(&output.results, cli.verbose, cli.free, cli.maybe);
         }
 
         return Ok(());
@@ -167,13 +175,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if cli.json {
         println!("{}", serde_json::to_string_pretty(&output)?);
     } else {
-        print_results(&output.results, cli.verbose);
+        print_results(&output.results, cli.verbose, cli.free, cli.maybe);
     }
 
     Ok(())
 }
 
-fn print_results(results: &[NameResult], verbose: bool) {
+fn is_maybe(d: &available::types::DomainDetail) -> bool {
+    matches!(d.site.as_deref(), Some("parked") | Some("unreachable"))
+}
+
+fn print_results(results: &[NameResult], verbose: bool, free: bool, maybe: bool) {
     for result in results {
         let bar = score_bar(result.score);
 
@@ -186,13 +198,13 @@ fn print_results(results: &[NameResult], verbose: bool) {
             String::new()
         };
 
-        // Use compact TLD display for <= 6 TLDs, summary for more
-        if result.domains.total <= 6 {
-            let com_status = domain_status(&result.domains.details, "com");
-            let dev_status = domain_status(&result.domains.details, "dev");
-            let io_status = domain_status(&result.domains.details, "io");
-            let app_status = domain_status(&result.domains.details, "app");
+        let com_status = domain_status(&result.domains.details, "com");
+        let dev_status = domain_status(&result.domains.details, "dev");
+        let io_status = domain_status(&result.domains.details, "io");
+        let app_status = domain_status(&result.domains.details, "app");
 
+        // Summary line always shows key TLDs
+        if result.domains.total <= 6 {
             println!(
                 "  {bar} {score:.0}%  {name:<20} .com{com} .dev{dev} .io{io} .app{app}  pkg: {pkg_avail}/{pkg_total}{stores}",
                 bar = bar,
@@ -208,16 +220,50 @@ fn print_results(results: &[NameResult], verbose: bool) {
             );
         } else {
             println!(
-                "  {bar} {score:.0}%  {name:<20} domains: {dom_avail}/{dom_total}  pkg: {pkg_avail}/{pkg_total}{stores}",
+                "  {bar} {score:.0}%  {name:<20} .com{com} .dev{dev} .io{io} .app{app}  domains: {dom_avail}/{dom_total}  pkg: {pkg_avail}/{pkg_total}{stores}",
                 bar = bar,
                 score = result.score * 100.0,
                 name = result.name,
+                com = com_status,
+                dev = dev_status,
+                io = io_status,
+                app = app_status,
                 dom_avail = result.domains.available,
                 dom_total = result.domains.total,
                 pkg_avail = result.packages.available,
                 pkg_total = result.packages.total,
                 stores = store_info,
             );
+
+            // Auto-show available domains (beyond the 4 key TLDs already shown)
+            let available_domains: Vec<&str> = result
+                .domains
+                .details
+                .iter()
+                .filter(|d| d.available == "available")
+                .map(|d| d.domain.as_str())
+                .filter(|d| {
+                    !d.ends_with(".com")
+                        && !d.ends_with(".dev")
+                        && !d.ends_with(".io")
+                        && !d.ends_with(".app")
+                })
+                .collect();
+            if !available_domains.is_empty() {
+                println!("         [+] {}", available_domains.join(", "));
+            }
+
+            // Auto-show taken packages
+            let taken_pkgs: Vec<&str> = result
+                .packages
+                .details
+                .iter()
+                .filter(|p| p.available == "taken")
+                .map(|p| p.registry.as_str())
+                .collect();
+            if !taken_pkgs.is_empty() {
+                println!("         [-] pkg: {}", taken_pkgs.join(", "));
+            }
         }
 
         if verbose {
@@ -225,6 +271,9 @@ fn print_results(results: &[NameResult], verbose: bool) {
                 println!("         suggested by: {}", result.suggested_by.join(", "));
             }
             for d in &result.domains.details {
+                if free && d.available != "available" && !(maybe && is_maybe(d)) {
+                    continue;
+                }
                 let symbol = availability_symbol(&d.available);
                 let site_info = d
                     .site
@@ -237,10 +286,16 @@ fn print_results(results: &[NameResult], verbose: bool) {
                 );
             }
             for p in &result.packages.details {
+                if free && p.available != "available" {
+                    continue;
+                }
                 let symbol = availability_symbol(&p.available);
                 println!("         {symbol} {:<24} {}", p.registry, p.available);
             }
             for s in &result.stores.details {
+                if free && s.available != "available" {
+                    continue;
+                }
                 let symbol = availability_symbol(&s.available);
                 println!(
                     "         {symbol} {:<24} {} ({} similar)",

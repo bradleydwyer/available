@@ -1,6 +1,6 @@
 [package]
 name = "available"
-version = "2.0.0"
+version = "2.0.1"
 edition = "2024"
 description = "Check project name availability across domains and package registries"
 license = "MIT"
