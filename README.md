@@ -61,13 +61,17 @@ Checking 14 names...
 ### Options
 
 ```
-    --generate             Generate names from a description instead of checking
-    --models <MODELS>      Comma-separated model names (default: auto-detect from API keys)
-    --tlds <TLDS>          Comma-separated TLDs to check (default: com,dev,io)
-    --registries <IDS>     Comma-separated registry IDs (default: popular 10)
-    --max-names <N>        Maximum names to generate (default: 20)
-    --json                 JSON output
--v, --verbose              Show per-domain and per-registry detail
+    --generate                 Generate names from a description instead of checking
+    --models <MODELS>          Comma-separated model names (default: auto-detect from API keys)
+    --tlds <TLDS>              Comma-separated TLDs to check (default: com,dev,io,app)
+    --all-tlds                 Check all common TLDs (~130)
+    --registries <REGISTRIES>  Comma-separated registry IDs (default: popular 10)
+    --all-registries           Check all registries (~30)
+    --languages <LANGUAGES>    Filter registries by language (e.g. rust,python,javascript)
+    --stores <STORES>          Comma-separated app store IDs (default: app_store, google_play)
+    --max-names <N>            Maximum names to generate (default: 20)
+    --json                     JSON output
+-v, --verbose                  Show per-domain and per-registry detail
 ```
 
 ### Verbose output

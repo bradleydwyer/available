@@ -51,6 +51,9 @@ available --generate "description of the project" --json
 The tool checks 3 TLDs (.com, .dev, .io) and 10 package registries by default. These defaults give the best results — do NOT pass `--tlds`, `--registries`, or `--models` unless the user specifically asks to customize them. Passing these flags limits the check to only what you specify, which produces worse results.
 
 Optional flags (only if the user requests):
+- `--all-tlds` — check all ~130 common TLDs instead of the default 4
+- `--all-registries` — check all ~30 registries instead of the default 10
+- `--languages rust,python` — filter registries by language
 - `--max-names 30` — generate more candidates (default: 20)
 - `--tlds com,dev,io,org` — override which TLDs to check
 - `--registries npm,crates.io` — override which registries to check (limits to ONLY these)
