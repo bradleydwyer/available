@@ -61,6 +61,7 @@ Checking 14 names...
 ### Options
 
 ```
+-a, --all                      Check all common TLDs (~130) and all registries (~30)
     --generate                 Generate names from a description instead of checking
     --models <MODELS>          Comma-separated model names (default: auto-detect from API keys)
     --tlds <TLDS>              Comma-separated TLDs to check (default: com,dev,io,app)
@@ -96,33 +97,6 @@ available aurora --json
 
 Returns structured JSON with per-name scores, domain details, and package registry results.
 
-### MCP server
-
-```bash
-available mcp
-```
-
-Three tools over stdio:
-
-| Tool | Description |
-|------|-------------|
-| `find_names` | Generate names via AI and check availability |
-| `check_names` | Check specific names (up to 50) |
-| `list_models` | Show configured LLM providers |
-
-Claude Code config:
-
-```json
-{
-  "mcpServers": {
-    "available": {
-      "command": "/path/to/available",
-      "args": ["mcp"]
-    }
-  }
-}
-```
-
 ## Claude Code Skill
 
 available includes a [skill](skill/SKILL.md) for Claude Code. Install it with [equip](https://github.com/bradleydwyer/equip):
@@ -139,10 +113,11 @@ Each name gets a 0-100% score based on availability:
 
 | Component | Weight |
 |-----------|--------|
-| .com domain | 30% |
-| .dev domain | 10% |
-| .io domain | 10% |
+| .com domain | 25% |
+| Other domains | 25% (split evenly) |
 | Package registries | 50% (split evenly) |
+
+When app stores are checked, domains get 40%, registries 40%, stores 20%.
 
 Available = full credit, unknown = half, taken = zero.
 

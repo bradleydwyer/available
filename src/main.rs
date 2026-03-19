@@ -1,11 +1,9 @@
-use clap::{Parser, Subcommand};
+use clap::Parser;
 
 use available::check;
 use available::generate;
-use available::mcp::AvailableMcp;
 use available::provider;
 use available::types::{AvailableResult, Config, NameResult};
-use rmcp::{ServiceExt, transport::stdio};
 
 #[derive(Parser)]
 #[command(
@@ -14,15 +12,16 @@ use rmcp::{ServiceExt, transport::stdio};
     version
 )]
 struct Cli {
-    #[command(subcommand)]
-    command: Option<Command>,
-
     /// Names to check (space or comma-separated), or description when using --generate
     prompt: Vec<String>,
 
     /// Generate names from a description instead of checking
     #[arg(long)]
     generate: bool,
+
+    /// Check all common TLDs and all registries
+    #[arg(short, long)]
+    all: bool,
 
     /// Comma-separated model names (default: auto-detect from API keys)
     #[arg(long)]
@@ -65,15 +64,9 @@ struct Cli {
     verbose: bool,
 }
 
-#[derive(Subcommand)]
-enum Command {
-    /// Start MCP server (stdio transport)
-    Mcp,
-}
-
 fn build_config(cli: &Cli) -> Config {
     let mut config = Config::default();
-    if cli.all_tlds {
+    if cli.all || cli.all_tlds {
         config.tlds = parked::tlds::COMMON_TLDS
             .iter()
             .map(|s| s.to_string())
@@ -83,7 +76,7 @@ fn build_config(cli: &Cli) -> Config {
     }
     if let Some(ref langs) = cli.languages {
         config.languages = langs.split(',').map(|s| s.trim().to_string()).collect();
-    } else if cli.all_registries {
+    } else if cli.all || cli.all_registries {
         config.all_registries = true;
     } else if let Some(ref registries) = cli.registries {
         config.registry_ids = registries
@@ -103,21 +96,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenvy::dotenv().ok();
     let cli = Cli::parse();
 
-    // MCP server mode
-    if let Some(Command::Mcp) = cli.command {
-        let server = AvailableMcp::new();
-        let service = server.serve(stdio()).await?;
-        service.waiting().await?;
-        return Ok(());
-    }
-
     let config = build_config(&cli);
 
     let input = cli.prompt.join(" ");
     if input.is_empty() {
         eprintln!("Usage: available name1 name2 name3");
         eprintln!("       available --generate \"project description\"");
-        eprintln!("       available mcp");
         eprintln!();
         eprintln!("Run 'available --help' for more information.");
         std::process::exit(1);

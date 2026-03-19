@@ -1,20 +1,18 @@
 [package]
 name = "available"
-version = "1.4.0"
+version = "2.0.0"
 edition = "2024"
 description = "Check project name availability across domains and package registries"
 license = "MIT"
 
 [dependencies]
 caucus-core = { git = "https://github.com/bradleydwyer/caucus", tag = "v1.0.2", package = "caucus-core" }
-parked = { git = "https://github.com/bradleydwyer/parked", tag = "v2.3.0" }
-published = { git = "https://github.com/bradleydwyer/published", tag = "v1.0.2" }
-staked = { git = "https://github.com/bradleydwyer/staked", tag = "v2.0.3" }
+parked = { git = "https://github.com/bradleydwyer/parked", tag = "v2.4.0" }
+published = { git = "https://github.com/bradleydwyer/published", tag = "v1.1.0" }
+staked = { git = "https://github.com/bradleydwyer/staked", tag = "v2.1.0" }
 clap = { version = "4", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-rmcp = { version = "0.12", features = ["server", "macros", "transport-io"] }
-schemars = "1"
 anyhow = "1"
 dotenvy = "0.15.7"
