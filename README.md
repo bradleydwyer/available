@@ -73,6 +73,8 @@ Checking 14 names...
     --max-names <N>            Maximum names to generate (default: 20)
     --json                     JSON output
 -v, --verbose                  Show per-domain and per-registry detail
+    --free                     In verbose mode, only show available entries
+    --maybe                    In verbose mode, also show parked/unreachable domains
 ```
 
 ### Verbose output

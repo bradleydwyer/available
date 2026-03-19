@@ -59,6 +59,9 @@ Optional flags (only if the user requests):
 - `--tlds com,dev,io,org` — override which TLDs to check
 - `--registries npm,crates.io` — override which registries to check (limits to ONLY these)
 - `--models claude-opus-4-6` — pick specific LLM models
+- `-v` / `--verbose` — show per-domain and per-registry detail
+- `--free` — in verbose mode, only show available entries (hides taken)
+- `--maybe` — in verbose mode, also show parked/unreachable domains (potentially acquirable)
 
 ## Parsing the JSON Output
 
