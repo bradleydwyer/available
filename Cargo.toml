@@ -1,15 +1,15 @@
 [package]
 name = "available"
-version = "1.2.1"
+version = "1.2.2"
 edition = "2024"
 description = "AI-powered project name finder — generates names via LLMs and checks domain + package registry availability"
 license = "MIT"
 
 [dependencies]
-caucus-core = { git = "https://github.com/bradleydwyer/caucus", tag = "v1.0.0", package = "caucus-core" }
-parked = { git = "https://github.com/bradleydwyer/parked", tag = "v2.2.0" }
-published = { path = "../published" }
-staked = { git = "https://github.com/bradleydwyer/staked", tag = "v2.0.0" }
+caucus-core = { git = "https://github.com/bradleydwyer/caucus", tag = "v1.0.1", package = "caucus-core" }
+parked = { git = "https://github.com/bradleydwyer/parked", tag = "v2.2.1" }
+published = { git = "https://github.com/bradleydwyer/published", tag = "v1.0.2" }
+staked = { git = "https://github.com/bradleydwyer/staked", tag = "v2.0.1" }
 clap = { version = "4", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
