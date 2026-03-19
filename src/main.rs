@@ -10,19 +10,19 @@ use rmcp::{ServiceExt, transport::stdio};
 #[derive(Parser)]
 #[command(
     name = "available",
-    about = "AI-powered project name finder — generates names and checks availability",
+    about = "Check project name availability across domains and registries",
     version
 )]
 struct Cli {
     #[command(subcommand)]
     command: Option<Command>,
 
-    /// Project description for AI name generation, or names to check with --check
+    /// Names to check (space or comma-separated), or description when using --generate
     prompt: Vec<String>,
 
-    /// Check specific names instead of generating (comma-separated)
+    /// Generate names from a description instead of checking
     #[arg(long)]
-    check: Option<String>,
+    generate: bool,
 
     /// Comma-separated model names (default: auto-detect from API keys)
     #[arg(long)]
@@ -92,68 +92,74 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let config = build_config(&cli);
 
-    // Check-only mode
-    if let Some(ref names_str) = cli.check {
-        let names: Vec<String> = names_str.split(',').map(|s| s.trim().to_string()).collect();
-        let results = check::check_name_strings(&names, &config).await;
-        let output = AvailableResult {
-            results,
-            models_used: vec![],
-            errors: vec![],
-        };
-        if cli.json {
-            println!("{}", serde_json::to_string_pretty(&output)?);
-        } else {
-            print_results(&output.results, cli.verbose);
-        }
-        return Ok(());
-    }
-
-    // Generation mode
-    let prompt = cli.prompt.join(" ");
-    if prompt.is_empty() {
-        eprintln!("Usage: available \"project description\"");
-        eprintln!("       available --check name1,name2,name3");
+    let input = cli.prompt.join(" ");
+    if input.is_empty() {
+        eprintln!("Usage: available name1 name2 name3");
+        eprintln!("       available --generate \"project description\"");
         eprintln!("       available mcp");
         eprintln!();
         eprintln!("Run 'available --help' for more information.");
         std::process::exit(1);
     }
 
-    let models = match cli.models {
-        Some(ref m) => m.split(',').map(|s| s.trim().to_string()).collect(),
-        None => provider::default_models(),
-    };
-    if models.is_empty() {
-        eprintln!(
-            "No API keys found. Set at least one of: ANTHROPIC_API_KEY, OPENAI_API_KEY, GOOGLE_API_KEY, XAI_API_KEY"
-        );
-        std::process::exit(1);
+    // Generation mode (opt-in with --generate)
+    if cli.generate {
+        let models = match cli.models {
+            Some(ref m) => m.split(',').map(|s| s.trim().to_string()).collect(),
+            None => provider::default_models(),
+        };
+        if models.is_empty() {
+            eprintln!(
+                "No API keys found. Set at least one of: ANTHROPIC_API_KEY, OPENAI_API_KEY, GOOGLE_API_KEY, XAI_API_KEY"
+            );
+            std::process::exit(1);
+        }
+
+        let multi = provider::build_provider(&models)?;
+        eprintln!("Generating names with: {}", models.join(", "));
+
+        let (candidates, errors) =
+            generate::generate_names(&multi, &input, config.max_names).await;
+
+        for error in &errors {
+            eprintln!("Warning: {} failed: {}", error.model, error.error);
+        }
+
+        if candidates.is_empty() {
+            eprintln!("No valid names generated. Try a different prompt.");
+            std::process::exit(1);
+        }
+
+        eprintln!("Checking {} names...", candidates.len());
+        let results = check::check_names(&candidates, &config).await;
+
+        let output = AvailableResult {
+            results,
+            models_used: models,
+            errors,
+        };
+
+        if cli.json {
+            println!("{}", serde_json::to_string_pretty(&output)?);
+        } else {
+            print_results(&output.results, cli.verbose);
+        }
+
+        return Ok(());
     }
 
-    let multi = provider::build_provider(&models)?;
-    eprintln!("Generating names with: {}", models.join(", "));
-
-    let (candidates, errors) = generate::generate_names(&multi, &prompt, config.max_names).await;
-
-    for error in &errors {
-        eprintln!("Warning: {} failed: {}", error.model, error.error);
-    }
-
-    if candidates.is_empty() {
-        eprintln!("No valid names generated. Try a different prompt.");
-        std::process::exit(1);
-    }
-
-    eprintln!("Checking {} names...", candidates.len());
-    let results = check::check_names(&candidates, &config).await;
-
+    // Default: check mode — treat positional args as names
+    let names: Vec<String> = input
+        .split([' ', ','])
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .collect();
+    let results = check::check_name_strings(&names, &config).await;
     let output = AvailableResult {
         results,
-        models_used: models,
-        errors,
+        models_used: vec![],
+        errors: vec![],
     };
-
     if cli.json {
         println!("{}", serde_json::to_string_pretty(&output)?);
     } else {

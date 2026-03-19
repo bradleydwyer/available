@@ -34,16 +34,16 @@ The user already has candidate names. The tool skips LLM generation and goes str
 
 Always pass `--json` so you can parse and present results cleanly.
 
+### Check specific names (default)
+
+```bash
+available name1 name2 name3 --json
+```
+
 ### Generate names
 
 ```bash
-available "description of the project" --json
-```
-
-### Check specific names
-
-```bash
-available --check "name1,name2,name3" --json
+available --generate "description of the project" --json
 ```
 
 ### Important: use defaults unless the user asks otherwise
@@ -127,6 +127,6 @@ If `errors` is non-empty, mention which models failed but don't make it the focu
 ## Tips
 
 - The tool needs at least one LLM API key set (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GOOGLE_API_KEY`, or `XAI_API_KEY`) for generate mode. Check mode works without any keys.
-- If the user wants to check a lot of names, use `--check` rather than generating — it's faster and doesn't need API keys.
+- Checking is the default mode — just pass names directly. Use `--generate` when the user wants AI-generated name suggestions.
 - Results are sorted by score (best first), so the top entries are always the strongest candidates.
 - If the binary isn't found, suggest: `cargo install --git https://github.com/brad/available` (adjust URL as needed).
